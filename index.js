@@ -1,22 +1,21 @@
 const pdf = require('pdf-parse');
 const fs = require('fs');
 
-let dataBuffer = fs.readFileSync('sensors_oka_v2_en.pdf');
-/*
-const options = {
-  encoding: 'binary',
-  pagerender: function(pageData) {
-    const {TextDecoder} = require('util');
-    const decoder = new TextDecoder('UTF-8');
-    const text = decoder.decode(pageData.text);
-    return Promise.resolve(text);
-  }
-};
-*/
+const dataBuffer = fs.readFileSync('sensors_oka_v2_en.pdf');
+const keywords = ['Abstract', 'Introduction', 'Related Works'];
 
 pdf(dataBuffer).then((data) => {
   const text = data.text;
-  fs.writeFileSync('./pdf.txt', text);
+  const splittedText = text.split('\n');
+
+  const numExp = /\d/;
+  for (const line of splittedText) {
+    if (line.includes(keywords[0])) {
+      console.log(line);
+    }
+  }
+    //console.log(splittedText);
+  //fs.writeFileSync('./pdf.txt', text);
 }).catch((err) => {
   console.log(err);
 });
