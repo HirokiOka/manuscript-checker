@@ -2,7 +2,10 @@ const pdf = require('pdf-parse');
 const fs = require('fs');
 
 const dataBuffer = fs.readFileSync('sensors_oka_v2_en.pdf');
-const sectionKeywords = ['Abstract', 'Introduction', 'Related Works'];
+const sectionKeywords = [
+  'Abstract', 'Introduction', 'Related Works', 'Proposed Method',
+  'Stumble Notification Application', 'Discussion', 'Conclusion',
+];
 const ignoreKeywords = ['Version April 3'];
 
 pdf(dataBuffer).then((data) => {
@@ -10,15 +13,18 @@ pdf(dataBuffer).then((data) => {
   const splittedText = text.split('\n');
 
   const numExp = /\d/g;
-  let printFlag = false;
+  let textArray = [];
+  let writeFlag = false;
+
   for (let line of splittedText) {
     if (line.includes(ignoreKeywords[0])) {
       continue;
     }
 
     if (line.includes(sectionKeywords[1])) {
-      printFlag = true;
+      writeFlag = true;
     }
+
 
 
     if (line.match(numExp)) {
@@ -32,6 +38,8 @@ pdf(dataBuffer).then((data) => {
           line = line.substring(0, digitIndex);
         }
       }
+
+      //Remove digits
       digitIndices.forEach((digitIndex, i) => {
         if (ignoreIndices.includes(digitIndex)) {
           line = line.substring(0, digitIndex+i);
@@ -39,16 +47,19 @@ pdf(dataBuffer).then((data) => {
       });
     }  
 
-    if (line.includes(sectionKeywords[2])) {
-      printFlag = false;
+    if (line.includes(sectionKeywords[6])) {
+      writeFlag = false;
     }
 
-    if (printFlag) console.log(line);
-
+    //if (writeFlag) console.log(line);
+    if (writeFlag) {
+      const inputText = line + '\n';
+      textArray.push(inputText);
+    }
   }
+  console.log(textArray);
 
-    //console.log(splittedText);
-  //fs.writeFileSync('./pdf.txt', text);
+  fs.writeFileSync('./pdf.txt', textArray.join(''));
 }).catch((err) => {
   console.log(err);
 });
